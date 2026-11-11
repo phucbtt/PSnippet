@@ -1,0 +1,16 @@
+[package]
+name = "zs-ui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+eframe = "0.37.0"
+raw-window-handle = "0.6.2"
+rfd = "0.18.0"
+uuid = "1.29.2"
+zs-core = { version = "0.1.0", path = "../core" }
+zs-mention = { version = "0.1.0", path = "../mention" }
+zs-parser = { version = "0.1.0", path = "../parser" }
+zs-storage = { version = "0.1.0", path = "../storage" }

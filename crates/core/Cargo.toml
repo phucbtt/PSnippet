@@ -1,0 +1,15 @@
+[package]
+name = "zs-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+thiserror = "2.0.21"
+unicode-normalization = "0.1.26"
+uuid = { version = "1.29.2", features = ["v4", "serde"] }
+
+[dev-dependencies]
+serde_json = "1.0.154"

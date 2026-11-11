@@ -1,0 +1,19 @@
+[package]
+name = "zs-storage"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rusqlite = { version = "0.42.0", features = ["backup", "bundled"] }
+serde = "1.0.229"
+serde_json = "1.0.154"
+thiserror = "2.0.21"
+time = { version = "0.3.55", features = ["formatting"] }
+uuid = { version = "1.29.2", features = ["v4"] }
+zs-core = { version = "0.1.0", path = "../core" }
+zs-parser = { version = "0.1.0", path = "../parser" }
+
+[dev-dependencies]
+tempfile = "3.27.0"

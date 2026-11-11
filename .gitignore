@@ -1,0 +1,6 @@
+target/
+dist/
+*.db
+*.tmp-backup
+.claude/
+.vscode/

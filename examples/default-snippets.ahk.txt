@@ -1,0 +1,50 @@
+::ztn::
+(
+Hiện tại em đã nhận được thông tin hỗ trợ từ chị [Tên].
+Bên em đã ghi nhận nội dung về [Nội dung] và đang kiểm tra để có hướng xử lý phù hợp ạ.
+Em sẽ cập nhật lại chị ngay khi có thông tin mới nhé!
+)
+return
+
+::ztnr::
+(
+Em xin phép cập nhật lại thông tin chị [Tên] vừa trao đổi với em qua điện thoại/tin nhắn riêng về vấn đề [Nội dung].
+Bên em đã tiếp nhận và sẽ kiểm tra, theo dõi nội dung này tại nhóm để Nhà trường cùng nắm thông tin ạ.
+)
+return
+
+::zxl::
+(
+Hiện tại bên em đang kiểm tra lại nội dung [Nội dung] để xác định nguyên nhân và hướng xử lý phù hợp ạ.
+Em sẽ chủ động cập nhật tiến độ cho Nhà trường nhé!
+)
+return
+
+::ztd::
+(
+Em xin phép cập nhật thêm về yêu cầu [Nội dung] của Nhà trường.
+Hiện tại bên em đã [Tiến độ đã thực hiện] và đang tiếp tục [Công việc tiếp theo].
+Em sẽ theo sát để cập nhật kết quả đến chị ạ.
+)
+return
+
+::zok::
+(
+Bên em xin cập nhật: vấn đề [Nội dung] của Nhà trường đã được xử lý xong ạ.
+Nhờ chị kiểm tra lại giúp em xem hiện tại đã sử dụng bình thường chưa nhé!
+)
+return
+
+::zgap::
+(
+Bên em rất tiếc vì trải nghiệm chưa tốt mà Nhà trường đang gặp phải.
+Em đã ghi nhận phản ánh về [Nội dung] và sẽ phối hợp với bộ phận phụ trách để kiểm tra, xử lý ạ.
+)
+return
+
+::zbackup::
+(
+Em là [Tên CS backup], hiện em xin phép tiếp nhận và tiếp tục theo dõi yêu cầu hỗ trợ [Nội dung] của Nhà trường.
+Em sẽ phối hợp xử lý để không làm gián đoạn việc hỗ trợ Nhà trường ạ.
+)
+return
