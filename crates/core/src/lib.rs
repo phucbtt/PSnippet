@@ -6,6 +6,7 @@ pub mod matcher;
 pub mod model;
 pub mod template;
 
+pub use config::{AppScope, app_entry_matches};
 pub use config::{Config, DelimKey, MentionModeCfg};
 pub use matcher::{Delim, KeyInput, Match, MatcherConfig, TriggerMatcher};
 pub use model::*;

@@ -121,16 +121,7 @@ pub fn foreground_exe() -> Option<String> {
 
 /// Does `exe_path` match an allowlist entry (full path or bare file name, case-insensitive)?
 pub fn exe_matches(exe_path: &str, entry: &str) -> bool {
-    let a = exe_path.to_lowercase();
-    let b = entry.trim().to_lowercase();
-    if b.is_empty() {
-        return false;
-    }
-    if a == b {
-        return true;
-    }
-    let file = a.rsplit(['\\', '/']).next().unwrap_or(&a);
-    !b.contains(['\\', '/']) && file == b
+    zs_core::app_entry_matches(exe_path, entry)
 }
 
 /// HWND of the focused control inside the foreground window's GUI thread (may be null for

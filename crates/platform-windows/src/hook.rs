@@ -17,11 +17,9 @@ use windows::Win32::System::Threading::GetCurrentThreadId;
 use windows::Win32::UI::Accessibility::{HWINEVENTHOOK, SetWinEventHook, UnhookWinEvent};
 use windows::Win32::UI::Input::KeyboardAndMouse::*;
 use windows::Win32::UI::WindowsAndMessaging::*;
-use zs_core::{Delim, KeyInput, Match, MatcherConfig, TriggerMatcher};
+use zs_core::{AppScope, Delim, KeyInput, Match, MatcherConfig, TriggerMatcher};
 
-use crate::context::{
-    bump_generation, exe_matches, foreground_hwnd, process_image_path, window_pid,
-};
+use crate::context::{bump_generation, foreground_hwnd, process_image_path, window_pid};
 use crate::{INJECT_MARKER, PlatformError, Result};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -70,8 +68,8 @@ pub enum HookEvent {
 pub struct HookConfig {
     pub matcher: MatcherConfig,
     pub codes: Vec<String>,
-    /// Executable allowlist: full paths or bare file names. Empty ⇒ hotstrings never fire (fail closed).
-    pub allowed_apps: Vec<String>,
+    /// Which apps hotstrings may fire in (all-except-blocked, or an allowlist).
+    pub scope: AppScope,
     /// "Ctrl+Alt+Space"-style strings.
     pub hotkeys: Vec<(HotkeyAction, String)>,
 }
@@ -80,7 +78,7 @@ pub struct Shared {
     matcher: Mutex<TriggerMatcher>,
     paused: AtomicBool,
     fg_allowed: AtomicBool,
-    allowed_apps: RwLock<Vec<String>>,
+    scope: RwLock<AppScope>,
     overflow: AtomicU64,
     /// Tick count (ms) of the last event seen by either low-level hook; used by the watchdog.
     last_hook_tick: AtomicU32,
@@ -111,9 +109,9 @@ impl Shared {
             m.set_config(cfg);
         }
     }
-    pub fn set_allowed_apps(&self, apps: Vec<String>) {
-        if let Ok(mut a) = self.allowed_apps.write() {
-            *a = apps;
+    pub fn set_app_scope(&self, scope: AppScope) {
+        if let Ok(mut a) = self.scope.write() {
+            *a = scope;
         }
         self.refresh_foreground();
     }
@@ -142,13 +140,16 @@ impl Shared {
         self.reset_buffer();
     }
     fn is_allowed_window(&self, hwnd: HWND) -> bool {
-        let Some(path) = window_pid(hwnd).and_then(process_image_path) else {
-            return false; // cannot identify ⇒ fail closed
+        let Some(pid) = window_pid(hwnd) else {
+            return false;
         };
-        self.allowed_apps
-            .read()
-            .map(|a| a.iter().any(|e| exe_matches(&path, e)))
-            .unwrap_or(false)
+        if pid == std::process::id() {
+            return false; // never expand inside PSnippet's own window (editor, form, palette)
+        }
+        let Some(path) = process_image_path(pid) else {
+            return false; // cannot identify (e.g. elevated app) ⇒ fail closed
+        };
+        self.scope.read().map(|s| s.permits(&path)).unwrap_or(false)
     }
 }
 
@@ -386,7 +387,7 @@ impl HookHandle {
             matcher: Mutex::new(matcher),
             paused: AtomicBool::new(false),
             fg_allowed: AtomicBool::new(false),
-            allowed_apps: RwLock::new(cfg.allowed_apps.clone()),
+            scope: RwLock::new(cfg.scope.clone()),
             overflow: AtomicU64::new(0),
             last_hook_tick: AtomicU32::new(unsafe { GetTickCount() }),
             reinstalls: AtomicU64::new(0),

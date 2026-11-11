@@ -235,10 +235,10 @@ impl MainView {
             });
         });
 
-        if cfg.allowed_apps.is_empty() {
+        if !cfg.allow_all_apps && cfg.allowed_apps.is_empty() {
             card(ui, |ui| {
                 ui.colored_label(WARN, "Chưa chọn ứng dụng nào");
-                ui.label("Gõ tắt đang vô hiệu ở mọi nơi. Mở mục Ứng dụng để thêm Zalo (hoặc Notepad để thử).");
+                ui.label("Bạn đang dùng chế độ \"Chỉ các ứng dụng tôi chọn\" nhưng danh sách trống, nên gõ tắt đang tắt ở mọi nơi.");
                 if ui.button("Đi tới Ứng dụng").clicked() {
                     self.page = Page::AppRules;
                 }
@@ -253,7 +253,7 @@ impl MainView {
 
         card(ui, |ui| {
             ui.strong("Cách dùng");
-            ui.label("1. Thêm ứng dụng (Zalo…) vào mục Ứng dụng.");
+            ui.label("1. Gõ tắt hoạt động ở mọi ứng dụng (có thể chặn hoặc giới hạn trong mục Ứng dụng).");
             ui.label("2. Trong ứng dụng đó, gõ mã (ví dụ ztn) rồi nhấn Space.");
             ui.label("3. Nội dung được thay ngay tại chỗ; chỗ [Tên] cần bạn sửa tay.");
             ui.weak(
@@ -707,50 +707,87 @@ impl MainView {
         st: &EngineStatus,
         cmds: &mut Vec<Cmd>,
     ) {
-        ui.heading("Ứng dụng được phép");
-        ui.label("Gõ tắt chỉ hoạt động khi cửa sổ đang dùng thuộc một ứng dụng dưới đây. Không có mục nào ⇒ vô hiệu ở mọi nơi.");
-        let mut remove: Option<usize> = None;
-        for (i, a) in cfg.allowed_apps.iter().enumerate() {
-            ui.horizontal(|ui| {
-                ui.label(a);
-                if ui.small_button("Xóa").clicked() {
-                    remove = Some(i);
-                }
-            });
-        }
-        if let Some(i) = remove {
-            cfg.allowed_apps.remove(i);
-            cmds.push(Cmd::ConfigChanged);
-        }
-        ui.separator();
-        ui.horizontal(|ui| {
-            ui.add(
-                egui::TextEdit::singleline(&mut self.new_app)
-                    .hint_text(r"Zalo.exe hoặc C:\đường\dẫn\app.exe")
-                    .desired_width(300.0),
+        ui.heading("Ứng dụng");
+        card(ui, |ui| {
+            ui.strong("Gõ tắt hoạt động ở đâu?");
+            let mut all = cfg.allow_all_apps;
+            ui.radio_value(
+                &mut all,
+                true,
+                "Mọi ứng dụng, trừ danh sách chặn (khuyên dùng)",
             );
-            if ui.button("Thêm").clicked() && !self.new_app.trim().is_empty() {
-                cfg.allowed_apps.push(self.new_app.trim().to_string());
-                self.new_app.clear();
+            ui.radio_value(&mut all, false, "Chỉ các ứng dụng tôi chọn");
+            if all != cfg.allow_all_apps {
+                cfg.allow_all_apps = all;
                 cmds.push(Cmd::ConfigChanged);
             }
+            ui.weak("Ô mật khẩu và cửa sổ của chính PSnippet luôn bị bỏ qua.");
         });
-        if ui
-            .button("Thêm ứng dụng đang dùng (chọn cửa sổ trong 3 giây)")
-            .clicked()
-        {
-            self.app_msg = Some("Hãy bấm vào cửa sổ ứng dụng cần thêm…".into());
-            cmds.push(Cmd::CaptureForegroundApp);
-        }
+
+        let (title, hint, empty) = if cfg.allow_all_apps {
+            (
+                "Ứng dụng bị chặn",
+                "Gõ tắt sẽ KHÔNG hoạt động trong các ứng dụng này.",
+                "Chưa chặn ứng dụng nào.",
+            )
+        } else {
+            (
+                "Ứng dụng được phép",
+                "Gõ tắt CHỈ hoạt động trong các ứng dụng này.",
+                "Chưa có ứng dụng nào: gõ tắt đang tắt ở mọi nơi.",
+            )
+        };
+        card(ui, |ui| {
+            ui.strong(title);
+            ui.weak(hint);
+            let list = if cfg.allow_all_apps {
+                &mut cfg.blocked_apps
+            } else {
+                &mut cfg.allowed_apps
+            };
+            let mut remove: Option<usize> = None;
+            for (i, a) in list.iter().enumerate() {
+                ui.horizontal(|ui| {
+                    ui.monospace(a);
+                    if ui.small_button("Xóa").clicked() {
+                        remove = Some(i);
+                    }
+                });
+            }
+            if list.is_empty() {
+                ui.colored_label(if cfg.allow_all_apps { OK } else { WARN }, empty);
+            }
+            if let Some(i) = remove {
+                list.remove(i);
+                cmds.push(Cmd::ConfigChanged);
+            }
+            ui.add_space(4.0);
+            ui.horizontal(|ui| {
+                ui.add(
+                    egui::TextEdit::singleline(&mut self.new_app)
+                        .hint_text(r"app.exe hoặc C:\đường\dẫn\app.exe")
+                        .desired_width(280.0),
+                );
+                if ui.button("Thêm").clicked() && !self.new_app.trim().is_empty() {
+                    list.push(self.new_app.trim().to_string());
+                    self.new_app.clear();
+                    cmds.push(Cmd::ConfigChanged);
+                }
+            });
+            if ui
+                .button("Thêm ứng dụng đang dùng (bấm vào cửa sổ đó trong 3 giây)")
+                .clicked()
+            {
+                self.app_msg = Some("Hãy bấm vào cửa sổ ứng dụng cần thêm…".into());
+                cmds.push(Cmd::CaptureForegroundApp);
+            }
+        });
         if let Some(m) = &self.app_msg {
             ui.colored_label(WARN, m);
         }
         if let Some(fg) = &st.foreground_exe {
             ui.weak(format!("Cửa sổ trước đó: {fg}"));
         }
-        ui.weak(
-            "Tên tiến trình Zalo không được mã hóa cứng: hãy chọn bằng nút trên khi đang mở Zalo.",
-        );
     }
 
     // ---- Settings ----------------------------------------------------------------------------

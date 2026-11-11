@@ -25,7 +25,7 @@ Chạy hoàn toàn offline, không cần quyền admin và **không bao giờ t�
 
 - **Thay thế tức thì:** `mã` + `Space` thay ngay tại chỗ như UniKey. Enter không bao giờ là phím kích hoạt.
 - **Biến:** `[Tên]` trong mẫu; palette có form điền biến và xem trước trực tiếp.
-- **Danh sách ứng dụng cho phép:** chỉ hoạt động ở ứng dụng bạn thêm (danh sách rỗng = tắt ở mọi nơi); có chế độ "chỉ Zalo" ở menu khay.
+- **Dùng ở mọi ứng dụng:** Notepad, Word, trình duyệt, Zalo, Teams, email… Có thể chặn từng ứng dụng, hoặc chỉ cho chạy ở danh sách tự chọn.
 - **Phím tắt bật/tắt toàn cục:** `Ctrl+Alt+P`; icon khay chuyển xám khi đang tắt.
 - **Ưu tiên tiếng Việt:** Unicode NFC, tương thích Telex/VNI, giao diện tiếng Việt.
 - **Nhập / xuất:** định dạng cũ `::mã::( … )return`, JSON `.zsnip`, sao lưu/khôi phục SQLite.
@@ -43,8 +43,8 @@ Có thể đối chiếu với file `.sha256` đi kèm.
 
 ## Bắt đầu nhanh
 
-1. Mở **Ứng dụng**, thêm ứng dụng bạn gõ vào (bấm vào cửa sổ đó trong 3 giây).
-2. Trong ứng dụng đó gõ `zok` rồi nhấn `Space` — mã được thay bằng mẫu.
+1. Ở bất kỳ ứng dụng nào (Notepad, trình duyệt, cửa sổ chat…) gõ `zok` rồi nhấn `Space` — mã được thay bằng mẫu.
+2. Tùy chọn: trong mục **Ứng dụng**, chặn các ứng dụng không muốn gõ tắt, hoặc chuyển sang "Chỉ các ứng dụng tôi chọn".
 3. Tạo mẫu riêng ở **Mẫu gõ tắt**, hoặc nhập file kiểu AutoHotkey ở **Nhập / Xuất**.
 
 Dữ liệu lưu tại `%LOCALAPPDATA%\PSnippet\data\snippets.db`. Trong Cài đặt có thể chuyển từ thay thế tức thì sang luồng form.
@@ -87,7 +87,7 @@ Tất cả đổi được trong Cài đặt.
 - Không dùng mạng, không telemetry, không tài khoản; mọi thứ nằm trong một file SQLite cục bộ.
 - Không bao giờ gửi tin nhắn; Enter không phải phím kích hoạt.
 - Không ghi log nội dung; log mặc định tắt, `ZS_LOG=info` + `ZS_LOG_FILE=<đường dẫn>` chỉ ghi trạng thái.
-- Từ chối ô mật khẩu, kiểm tra lại cửa sổ đích trước mỗi lần chèn, khôi phục clipboard sau khi dán.
+- Bỏ qua ô mật khẩu, trình quản lý mật khẩu phổ biến và cửa sổ của chính PSnippet; kiểm tra lại cửa sổ đích trước mỗi lần chèn, khôi phục clipboard sau khi dán.
 - Báo lỗi bảo mật riêng tư: xem [SECURITY.md](SECURITY.md).
 
 ## Build từ mã nguồn

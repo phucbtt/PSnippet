@@ -11,7 +11,8 @@ pub struct Tray {
     /// (menu id, snippet code) for the current "Quick snippets" entries.
     pub quick: Vec<(MenuId, String)>,
     pub pause: MenuItem,
-    pub zalo_only: CheckMenuItem,
+    /// Checked ⇒ only the selected apps; unchecked ⇒ every app except the block list.
+    pub only_selected: CheckMenuItem,
     pub autostart: CheckMenuItem,
     pub diagnostics: MenuItem,
     pub exit: MenuItem,
@@ -28,12 +29,13 @@ fn make_icon(paused: bool) -> Icon {
 }
 
 impl Tray {
-    pub fn new(autostart: bool, zalo_only: bool) -> Result<Self, String> {
+    pub fn new(autostart: bool, only_selected: bool) -> Result<Self, String> {
         let open = MenuItem::new("Mở PSnippet", true, None);
         let palette = MenuItem::new("Mở palette mẫu", true, None);
         let pause = MenuItem::new("Tạm dừng", true, None);
         let quick_menu = Submenu::new("Mẫu nhanh", true);
-        let zalo_only = CheckMenuItem::new("Phạm vi: chỉ Zalo", true, zalo_only, None);
+        let only_selected =
+            CheckMenuItem::new("Chỉ chạy ở ứng dụng đã chọn", true, only_selected, None);
         let autostart = CheckMenuItem::new("Khởi động cùng Windows", true, autostart, None);
         let diagnostics = MenuItem::new("Chẩn đoán", true, None);
         let exit = MenuItem::new("Thoát", true, None);
@@ -44,7 +46,7 @@ impl Tray {
             &quick_menu,
             &PredefinedMenuItem::separator(),
             &pause,
-            &zalo_only,
+            &only_selected,
             &autostart,
             &diagnostics,
             &PredefinedMenuItem::separator(),
@@ -64,7 +66,7 @@ impl Tray {
             quick_menu,
             quick: Vec::new(),
             pause,
-            zalo_only,
+            only_selected,
             autostart,
             diagnostics,
             exit,

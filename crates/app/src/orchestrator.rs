@@ -106,7 +106,7 @@ impl ZsApp {
             }));
         }
         zs_ui::install_fonts(&cc.egui_ctx);
-        let tray = Tray::new(cfg.autostart, cfg.zalo_only).ok();
+        let tray = Tray::new(cfg.autostart, !cfg.allow_all_apps).ok();
         let mut app = Self {
             store,
             cfg,
@@ -187,7 +187,7 @@ impl ZsApp {
         let cfg = HookConfig {
             matcher: self.cfg.matcher_config(),
             codes: self.codes(),
-            allowed_apps: self.cfg.effective_allowed_apps(),
+            scope: self.cfg.app_scope(),
             hotkeys: self.hotkeys(),
         };
         match HookHandle::start(cfg) {
@@ -227,7 +227,7 @@ impl ZsApp {
         }
         if let Some(h) = &self.hook {
             h.shared.set_matcher_config(self.cfg.matcher_config());
-            h.shared.set_allowed_apps(self.cfg.effective_allowed_apps());
+            h.shared.set_app_scope(self.cfg.app_scope());
             let codes = self.codes();
             h.shared.set_codes(codes.iter().map(String::as_str));
             h.shared
@@ -246,8 +246,8 @@ impl ZsApp {
             if t.autostart.is_checked() != self.cfg.autostart {
                 t.autostart.set_checked(self.cfg.autostart);
             }
-            if t.zalo_only.is_checked() != self.cfg.zalo_only {
-                t.zalo_only.set_checked(self.cfg.zalo_only);
+            if t.only_selected.is_checked() == self.cfg.allow_all_apps {
+                t.only_selected.set_checked(!self.cfg.allow_all_apps);
             }
         }
         if let Err(e) = pw::system::set_autostart(self.cfg.autostart) {
@@ -347,20 +347,21 @@ impl ZsApp {
                 AppEvent::Hook(h) => self.on_hook_event(h, ctx),
                 AppEvent::Menu(id) => self.on_menu(id, ctx),
                 AppEvent::Captured(exe) => match exe {
-                    Some(p)
-                        if !self
-                            .cfg
-                            .allowed_apps
-                            .iter()
-                            .any(|a| a.eq_ignore_ascii_case(&p)) =>
-                    {
-                        self.cfg.allowed_apps.push(p.clone());
-                        self.apply_config(ctx);
-                        self.view.set_app_message(format!("Đã thêm: {p}"));
+                    Some(p) => {
+                        let (list, verb) = if self.cfg.allow_all_apps {
+                            (&mut self.cfg.blocked_apps, "Đã chặn")
+                        } else {
+                            (&mut self.cfg.allowed_apps, "Đã thêm")
+                        };
+                        if list.iter().any(|a| a.eq_ignore_ascii_case(&p)) {
+                            self.view
+                                .set_app_message(format!("Đã có trong danh sách: {p}"));
+                        } else {
+                            list.push(p.clone());
+                            self.apply_config(ctx);
+                            self.view.set_app_message(format!("{verb}: {p}"));
+                        }
                     }
-                    Some(p) => self
-                        .view
-                        .set_app_message(format!("Đã có trong danh sách: {p}")),
                     None => self.view.set_app_message(
                         "Không xác định được ứng dụng (có thể chạy với quyền cao hơn).",
                     ),
@@ -378,8 +379,8 @@ impl ZsApp {
             .map(|(_, c)| c.clone())
         {
             self.on_quick_snippet(&code, ctx);
-        } else if id == *t.zalo_only.id() {
-            self.cfg.zalo_only = t.zalo_only.is_checked();
+        } else if id == *t.only_selected.id() {
+            self.cfg.allow_all_apps = !t.only_selected.is_checked();
             self.apply_config(ctx);
         } else if id == *t.open.id() {
             self.show_main(ctx);
@@ -933,11 +934,7 @@ impl ZsApp {
         if from_hotkey {
             // Snapshot the target BEFORE our window takes focus.
             if let Some((t, probe)) = pw::context::snapshot_foreground(self.probe_timeout()) {
-                let allowed = self
-                    .cfg
-                    .allowed_apps
-                    .iter()
-                    .any(|a| pw::context::exe_matches(&t.executable_path, a));
+                let allowed = self.cfg.app_scope().permits(&t.executable_path);
                 if allowed && self.evaluate_probe(&probe).is_ok() {
                     self.palette_target = Some(t);
                 }

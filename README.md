@@ -15,8 +15,8 @@ English · [Tiếng Việt](README.vi.md)
 </div>
 
 PSnippet works like UniKey's macro table or AutoHotkey hotstrings: type `ztn` and press `Space`, and the code is replaced in place
-with a multi-line template. It is built for people who answer the same messages all day (support teams, admins, sales) and who
-type Vietnamese. It runs fully offline, needs no administrator rights, and **never sends a message for you**.
+with a multi-line template. It works in any Windows app and is built for people who type the same messages all day (support teams, admins,
+sales), with first-class Vietnamese support. It runs fully offline, needs no administrator rights, and **never sends a message for you**.
 
 > [!NOTE]
 > **Project status: early (0.1.x).** It builds, passes its unit tests, and has not yet been verified on a real Zalo PC client —
@@ -35,7 +35,7 @@ type Vietnamese. It runs fully offline, needs no administrator rights, and **nev
 |---|---|
 | **Instant expansion** | `code` + `Space` is replaced in place, UniKey-style. Enter never triggers. Word-boundary aware. |
 | **Variables** | `[Name]` placeholders in templates; a palette with a fill-in form and live preview when you prefer typing values first. |
-| **Per-app allowlist** | Hotstrings only fire in apps you add (empty list = disabled everywhere). Optional "Zalo only" scope from the tray. |
+| **Works in every app** | Notepad, Word, browsers, Zalo, Teams, Slack, email clients… Block specific apps, or restrict expansion to a chosen list. |
 | **Global on/off hotkey** | `Ctrl+Alt+P` pauses/resumes expansion; the tray icon turns grey while paused. |
 | **Vietnamese first** | Unicode (NFC) throughout, Telex/VNI-friendly typing window, Vietnamese UI. |
 | **Import / export** | Legacy `::code::( … )return` blocks, `.zsnip` JSON, SQLite backup and restore. |
@@ -53,8 +53,8 @@ Requirements: Windows 10 or 11, x64. The binary is **not code-signed yet**, so S
 
 ## Quick start
 
-1. Open **Ứng dụng (App Rules)** and add the application you type into (click its window within 3 seconds).
-2. In that app, type `zok` and press `Space` — the code is replaced by its template.
+1. In any app (Notepad, a browser, a chat window…), type `zok` and press `Space` — the code is replaced by its template.
+2. Optional: under **Ứng dụng (Apps)**, block apps where you never want expansion, or switch to "only the apps I choose".
 3. Add your own templates under **Mẫu gõ tắt (Snippets)**, or import an existing AutoHotkey-style file under **Nhập / Xuất**.
 
 Data is stored in `%LOCALAPPDATA%\PSnippet\data\snippets.db`. Settings let you switch from instant expansion to the form flow.
@@ -96,7 +96,7 @@ The same variable name used twice is filled once. A code starts with a letter, i
 - **No network, no telemetry, no accounts.** Everything stays in a local SQLite file.
 - **Never sends a message.** There is no code path that presses Enter/Send; Enter is never a trigger.
 - **No content logging.** Logs are off by default; `ZS_LOG=info` with `ZS_LOG_FILE=<path>` writes a state-only trace (no typed text, no chat content).
-- **Guarded insertion.** Password fields are refused; the target window is re-validated before every injection; the clipboard is restored after pasting.
+- **Guarded insertion.** Password fields, common password managers and PSnippet's own window are excluded; the target window is re-validated before every injection; the clipboard is restored after pasting.
 - **Fail-open keyboard hook.** If anything is uncertain the keystroke passes through untouched.
 - Report vulnerabilities privately — see [SECURITY.md](SECURITY.md).
 
