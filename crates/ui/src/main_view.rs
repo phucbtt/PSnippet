@@ -20,6 +20,7 @@ pub enum Page {
     AppRules,
     Settings,
     Diagnostics,
+    About,
 }
 
 const PAGES: &[(Page, &str)] = &[
@@ -30,6 +31,7 @@ const PAGES: &[(Page, &str)] = &[
     (Page::AppRules, "Ứng dụng"),
     (Page::Settings, "Cài đặt"),
     (Page::Diagnostics, "Chẩn đoán"),
+    (Page::About, "Giới thiệu"),
 ];
 
 /// Read-only engine state pushed in by the orchestrator each frame.
@@ -178,6 +180,7 @@ impl MainView {
                     Page::AppRules => self.page_app_rules(ui, cfg, st, &mut cmds),
                     Page::Settings => self.page_settings(ui, cfg, &mut cmds),
                     Page::Diagnostics => self.page_diagnostics(ui, cfg, st),
+                    Page::About => self.page_about(ui),
                 }
             });
         });
@@ -273,6 +276,40 @@ impl MainView {
                 });
         });
         ui.weak("Tag (@) thật chỉ hoàn tất khi bạn chọn thành viên trong gợi ý của Zalo; chưa kiểm chứng trên Zalo PC thực tế.");
+    }
+
+    // ---- About -------------------------------------------------------------------------------
+
+    fn page_about(&mut self, ui: &mut egui::Ui) {
+        ui.heading("Giới thiệu");
+        card(ui, |ui| {
+            ui.label(
+                egui::RichText::new("PSnippet")
+                    .size(24.0)
+                    .strong()
+                    .color(ACCENT),
+            );
+            ui.label(format!("Phiên bản {}", env!("CARGO_PKG_VERSION")));
+            ui.add_space(4.0);
+            ui.label("Trình gõ tắt offline, mã nguồn mở cho Windows: gõ mã rồi nhấn Space để thay bằng mẫu nhiều dòng.");
+            ui.weak("PSnippet không bao giờ tự gửi tin nhắn, không đọc nội dung cuộc trò chuyện, không dùng mạng.");
+        });
+        card(ui, |ui| {
+            ui.hyperlink_to(
+                "Mã nguồn trên GitHub",
+                "https://github.com/phucbtt/PSnippet",
+            );
+            ui.hyperlink_to(
+                "Bản phát hành (Releases)",
+                "https://github.com/phucbtt/PSnippet/releases",
+            );
+            ui.hyperlink_to(
+                "Báo lỗi / góp ý",
+                "https://github.com/phucbtt/PSnippet/issues",
+            );
+            ui.add_space(4.0);
+            ui.weak("Giấy phép MIT. Dự án độc lập, không liên kết với hay được xác nhận bởi Zalo / VNG.");
+        });
     }
 
     // ---- Snippets ----------------------------------------------------------------------------

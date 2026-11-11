@@ -1,0 +1,33 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  windows-release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace --locked
+      - name: Package
+        shell: pwsh
+        run: |
+          ./packaging/build-dist.ps1
+          Copy-Item target/release/psnippet.exe dist/PSnippet.exe
+          (Get-FileHash dist/PSnippet.exe -Algorithm SHA256).Hash + "  PSnippet.exe" | Set-Content dist/PSnippet.exe.sha256
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            **PSnippet** — offline text expander for Windows 10/11 x64 (UniKey-style hotstrings).
+            Download `PSnippet.exe` (portable, no install) or the zip (adds install/uninstall scripts).
+            Not code-signed: Windows SmartScreen may warn on first run ("More info" → "Run anyway").
+            Not yet verified on a real Zalo PC — see docs/compatibility-matrix.md.
+          files: |
+            dist/PSnippet.exe
+            dist/PSnippet.exe.sha256
+            dist/PSnippet-*-win-x64.zip
+            dist/PSnippet-*-win-x64.zip.sha256
